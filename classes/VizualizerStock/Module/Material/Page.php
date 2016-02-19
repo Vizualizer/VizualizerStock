@@ -23,42 +23,17 @@
  */
 
 /**
- * 注文のモデルです。
+ * 仕入商品のリストをページング付きで取得する。
  *
- * @package VizualizerStock
+ * @package VizualizerTrade
  * @author Naohisa Minagawa <info@vizualizer.jp>
  */
-class VizualizerStock_Model_Order extends Vizualizer_Plugin_Model
+class VizualizerStock_Module_Material_Page extends Vizualizer_Plugin_Module_Page
 {
 
-    /**
-     * コンストラクタ
-     *
-     * @param $values モデルに初期設定する値
-     */
-    public function __construct($values = array())
+    function execute($params)
     {
-        $loader = new Vizualizer_Plugin("stock");
-        parent::__construct($loader->loadTable("Orders"), $values);
-    }
-
-    /**
-     * 主キーでデータを取得する。
-     *
-     * @param $order_id 商品構成資材ID
-     */
-    public function findByPrimaryKey($order_id)
-    {
-        $this->findBy(array("order_id" => $order_id));
-    }
-
-    /**
-     * 注文データ
-     */
-    public function orderDetail()
-    {
-        $loader = new Vizualizer_Plugin("stock");
-        $model = $loader->loadModel("OrderDetail");
-        return $model->findAllByOrderId($this->order_id);
+        $post = Vizualizer::request();
+        $this->executeImpl($params, "Stock", "Material", $params->get("result", "materials"));
     }
 }
