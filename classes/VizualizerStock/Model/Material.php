@@ -60,7 +60,6 @@ class VizualizerStock_Model_Material extends Vizualizer_Plugin_Model
         return $model;
     }
 
-
     public function purchases($status = "")
     {
         $loader = new Vizualizer_Plugin("stock");
@@ -70,5 +69,16 @@ class VizualizerStock_Model_Material extends Vizualizer_Plugin_Model
             $condition["purchase_status"] = $status;
         }
         return $model->findAllBy($condition);
+    }
+
+    public function stock()
+    {
+        $purchases = $this->purchases("stocked");
+        $stock = 0;
+        foreach ($purchses as $purchase) {
+            if ($purchase->volume > $purchase->consumed) {
+                $stock += $purchase->volume - $purchase->consumed;
+            }
+        }
     }
 }
