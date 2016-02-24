@@ -51,18 +51,37 @@ class VizualizerStock_Batch_Import extends Vizualizer_Plugin_Batch
      * @return バッチで引き回すデータ
      */
     protected function importOrders($params, $data){
-        $s3 = S3Client::factory();
-
         try {
+            // Use the us-west-2 region and latest version of each client.
+            $sharedConfig = array(
+                'region'  => 'ap-northeast-1',
+                'version' => 'latest'
+            );
+
+            // Create an SDK class used to share configuration across clients.
+            $sdk = new Aws\Sdk($sharedConfig);
+
+            // Create an Amazon S3 client using the shared configuration data.
+            $client = $sdk->createS3();
+            $time = strtotime("2016-02-12");
             // Get the object
-            $result = $s3->getObject(array(
+            $result = $client->getObject(array(
                 'Bucket' => "oder-report",
-                'Key'    => "/150/201602/sales-2016-02-18.csv"
+                'Key'    => "150/".date("Ym", $time)."/sales-".date("Y-m-d", $time).".csv"
             ));
 
-            // Display the object in the browser
-            header("Content-Type: {$result['ContentType']}");
-            echo $result['Body'];
+            Vizualizer_Logger::writeDebug($result['Body']);
+
+            $lines = explode("\n", $result['Body']);
+            $data = array();
+
+            foreach($lines as $line) {
+                if (!empty($line)) {
+                    $data[] = str_getcsv($line);
+                }
+            }
+
+            Vizualizer_Logger::writeDebug(print_r($data, true));
         } catch (S3Exception $e) {
             echo $e->getMessage() . "\n";
         }
