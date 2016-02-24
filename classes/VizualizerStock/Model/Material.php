@@ -75,7 +75,7 @@ class VizualizerStock_Model_Material extends Vizualizer_Plugin_Model
     {
         $purchases = $this->purchases("stocked");
         $stock = 0;
-        foreach ($purchses as $purchase) {
+        foreach ($purchases as $purchase) {
             if ($purchase->volume > $purchase->consumed) {
                 $stock += $purchase->volume - $purchase->consumed;
             }
