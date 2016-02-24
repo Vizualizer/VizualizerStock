@@ -106,7 +106,10 @@ class VizualizerStock_Batch_Import extends Vizualizer_Plugin_Batch
                         $loader = new Vizualizer_Plugin("stock");
 
                         $model = $loader->loadModel("Order");
-                        $model->order_id = $item["order_id"];
+                        $model->findByPrimaryKey($item["order_id"]);
+                        if (!($model->order_id > 0)) {
+                            $model = $loader->loadModel("Order", array("order_id" => $item["order_id"]));
+                        }
                         $model->user_id = $item["user_id"];
                         $model->payment_type = $item["payment_type"];
                         $model->order_date = $item["purchase_date"];
