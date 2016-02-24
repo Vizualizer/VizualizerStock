@@ -77,15 +77,114 @@ class VizualizerStock_Batch_Import extends Vizualizer_Plugin_Batch
             Vizualizer_Logger::writeDebug($result['Body']);
 
             $lines = explode("\n", $result['Body']);
+            $columns = array();
             $data = array();
 
-            foreach($lines as $line) {
+            foreach($lines as $index => $line) {
                 if (!empty($line)) {
-                    $data[] = str_getcsv($line);
+                    if ($index > 0) {
+                        $item = str_getcsv($line);
+                        $record = array();
+                        foreach($columns as $i => $key) {
+                            $record[$key] = $item[$i];
+                        }
+                        $data[] = $record;
+                    } else {
+                        $columns = str_getcsv($line);
+                    }
                 }
             }
 
             Vizualizer_Logger::writeDebug(print_r($data, true));
+
+            $sets = array();
+            foreach ($data as $item) {
+                if ($item["type"] == "summary") {
+                    // トランザクションの開始
+                    $connection = Vizualizer_Database_Factory::begin("stock");
+                    try {
+                        $loader = new Vizualizer_Plugin("stock");
+
+                        $model = $loader->loadModel("Order");
+                        $model->order_id = $item["order_id"];
+                        $model->user_id = $item["user_id"];
+                        $model->payment_type = $item["payment_type"];
+                        $model->order_date = $item["purchase_date"];
+                        $model->price = $item["price"];
+                        $model->save();
+
+                        // エラーが無かった場合、処理をコミットする。
+                        Vizualizer_Database_Factory::commit($connection);
+                    } catch (Exception $e) {
+                        Vizualizer_Database_Factory::rollback($connection);
+                        throw new Vizualizer_Exception_Database($e);
+                    }
+                }
+                if ($item["type"] == "set") {
+                    $sets[$item["order_id"]."-".$item["set_id"]] = $item;
+
+                    // トランザクションの開始
+                    $connection = Vizualizer_Database_Factory::begin("stock");
+                    try {
+                        $loader = new Vizualizer_Plugin("stock");
+
+                        $model = $loader->loadModel("OrderDetail");
+                        $model->order_id = $item["order_id"];
+                        $model->set_id = $item["set_id"];
+                        $model->set_menu_name = $item["set_menu_name"];
+                        $model->order_date = $item["purchase_date"];
+                        $model->price = $item["price"];
+                        $model->quantity = $item["count"];
+                        $model->save();
+
+                        $model = $loader->loadModel("Menu");
+                        $model->findBy(array("set_id" => $item["set_id"], "choice_id" => 0));
+                        $model->set_id = $item["set_id"];
+                        $model->set_menu_name = $sets[$item["order_id"]."-".$item["set_id"]]["set_menu_name"];
+                        $model->menu_name = $item["menu_name"];
+                        $model->price = $item["price"];
+                        $model->save();
+
+                        // エラーが無かった場合、処理をコミットする。
+                        Vizualizer_Database_Factory::commit($connection);
+                    } catch (Exception $e) {
+                        Vizualizer_Database_Factory::rollback($connection);
+                        throw new Vizualizer_Exception_Database($e);
+                    }
+                }
+                if ($item["type"] == "choice") {
+                    // トランザクションの開始
+                    $connection = Vizualizer_Database_Factory::begin("stock");
+                    try {
+                        $loader = new Vizualizer_Plugin("stock");
+
+                        $model = $loader->loadModel("OrderDetail");
+                        $model->order_id = $item["order_id"];
+                        $model->set_id = $item["set_id"];
+                        $model->choice_id = $item["choice_id"];
+                        $model->set_menu_name = $sets[$item["order_id"]."-".$item["set_id"]]["set_menu_name"];
+                        $model->menu_name = $item["menu_name"];
+                        $model->price = $item["price"];
+                        $model->quantity = $sets[$item["order_id"]."-".$item["set_id"]]["count"];
+                        $model->save();
+
+                        $model = $loader->loadModel("Menu");
+                        $model->findBy(array("set_id" => $item["set_id"], "choice_id" => $item["choice_id"]));
+                        $model->set_id = $item["set_id"];
+                        $model->choice_id = $item["choice_id"];
+                        $model->set_menu_name = $sets[$item["order_id"]."-".$item["set_id"]]["set_menu_name"];
+                        $model->menu_name = $item["menu_name"];
+                        $model->price = $item["price"];
+                        $model->save();
+
+                        // エラーが無かった場合、処理をコミットする。
+                        Vizualizer_Database_Factory::commit($connection);
+                    } catch (Exception $e) {
+                        Vizualizer_Database_Factory::rollback($connection);
+                        throw new Vizualizer_Exception_Database($e);
+                    }
+                }
+            }
         } catch (S3Exception $e) {
             echo $e->getMessage() . "\n";
         }
