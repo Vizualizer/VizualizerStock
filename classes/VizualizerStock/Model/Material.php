@@ -80,5 +80,6 @@ class VizualizerStock_Model_Material extends Vizualizer_Plugin_Model
                 $stock += $purchase->volume - $purchase->consumed;
             }
         }
+        return $stock;
     }
 }
