@@ -51,4 +51,11 @@ class VizualizerStock_Model_Menu extends Vizualizer_Plugin_Model
     {
         $this->findBy(array("menu_id" => $menu_id));
     }
+
+    public function components()
+    {
+        $loader = new Vizualizer_Plugin("stock");
+        $model = $loader->loadModel("Component");
+        return $model->findAllBy(array("menu_id" => $this->menu_id));
+    }
 }
