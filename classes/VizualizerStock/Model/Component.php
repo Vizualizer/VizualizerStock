@@ -51,4 +51,12 @@ class VizualizerStock_Model_Component extends Vizualizer_Plugin_Model
     {
         $this->findBy(array("component_id" => $component_id));
     }
+
+    public function material()
+    {
+        $loader = new Vizualizer_Plugin("stock");
+        $model = $loader->loadModel("Material");
+        $model->findByPrimaryKey($this->material_id);
+        return $model;
+    }
 }
