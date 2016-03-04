@@ -154,6 +154,13 @@ class VizualizerStock_Batch_Import extends Vizualizer_Plugin_Batch
                         Vizualizer_Database_Factory::rollback($connection);
                         throw new Vizualizer_Exception_Database($e);
                     }
+
+                    // 在庫の引き当てを実施
+                    $model = $loader->loadModel("OrderDetail");
+                    $models = $model->findAllBy(array("set_id" => $item["set_id"], "ne:provision_flg" => "1"));
+                    foreach ($models as $model) {
+                        $model->provision();
+                    }
                 }
                 if ($item["type"] == "choice") {
                     // トランザクションの開始
@@ -185,6 +192,13 @@ class VizualizerStock_Batch_Import extends Vizualizer_Plugin_Batch
                     } catch (Exception $e) {
                         Vizualizer_Database_Factory::rollback($connection);
                         throw new Vizualizer_Exception_Database($e);
+                    }
+
+                    // 在庫の引き当てを実施
+                    $model = $loader->loadModel("OrderDetail");
+                    $models = $model->findAllBy(array("set_id" => $item["set_id"], "choice_id" => $item["choice_id"], "ne:provision_flg" => "1"));
+                    foreach ($models as $model) {
+                        $model->provision();
                     }
                 }
             }

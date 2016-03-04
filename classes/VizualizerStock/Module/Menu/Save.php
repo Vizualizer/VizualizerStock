@@ -34,5 +34,18 @@ class VizualizerStock_Module_Menu_Save extends Vizualizer_Plugin_Module_Save
     function execute($params)
     {
         $this->executeImpl("Stock", "Menu", "menu_id");
+
+        $loader = new Vizualizer_Plugin("stock");
+        $model = $loader->loadModel("Menu");
+        $model->findByPrimaryKey($post["menu_id"]);
+
+        if ($model->menu_id > 0 && $model->fixed_flg == "1") {
+            $orderDetail = $loader->loadModel("OrderDetail");
+            $orderDetails = $orderDetail->findAllBy(array("ne:provision_flg" => "1"));
+
+            foreach ($orderDetails as $orderDetail) {
+                $orderDetail->provision();
+            }
+        }
     }
 }
