@@ -42,7 +42,7 @@ class VizualizerStock_Module_Menu_Save extends Vizualizer_Plugin_Module_Save
 
         if ($model->menu_id > 0 && $model->fixed_flg == "1") {
             $orderDetail = $loader->loadModel("OrderDetail");
-            $orderDetails = $orderDetail->findAllBy(array("ne:provision_flg" => "1"));
+            $orderDetails = $orderDetail->findAllBy(array("set_id" => $model->set_id, "choice_id" => $model->choice_id, "ne:provision_flg" => "1"));
 
             foreach ($orderDetails as $orderDetail) {
                 $orderDetail->provision();
