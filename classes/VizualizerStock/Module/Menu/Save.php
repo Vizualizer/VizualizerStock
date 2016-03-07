@@ -35,6 +35,7 @@ class VizualizerStock_Module_Menu_Save extends Vizualizer_Plugin_Module_Save
     {
         $this->executeImpl("Stock", "Menu", "menu_id");
 
+        $post = Vizualizer::request();
         $loader = new Vizualizer_Plugin("stock");
         $model = $loader->loadModel("Menu");
         $model->findByPrimaryKey($post["menu_id"]);
