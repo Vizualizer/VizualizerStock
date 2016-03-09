@@ -146,6 +146,7 @@ class VizualizerStock_Batch_Import extends Vizualizer_Plugin_Batch
                         $model->set_menu_name = $sets[$item["order_id"]."-".$item["set_id"]]["set_menu_name"];
                         $model->menu_name = $item["menu_name"];
                         $model->price = $item["price"];
+                        $model->fixed_flg = "1";
                         $model->save();
 
                         // エラーが無かった場合、処理をコミットする。
