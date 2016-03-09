@@ -66,9 +66,11 @@ class VizualizerStock_Model_Report extends Vizualizer_Plugin_Model
         foreach ($this->details as $purchase_id => $volume) {
             $model = $loader->loadModel("ReportDetail");
             $model->findBy(array("report_id" => $this->report_id, "purchase_id" => $purchase_id));
-            $purchase = $loader->loadModel("ReportDetail");
+            $purchase = $loader->loadModel("Purchase");
             $purchase->findByPrimaryKey($purchase_id);
             if (!($model->report_detail_id > 0)) {
+                $model->report_id = $this->report_id;
+                $model->purchase_id = $purchase_id;
                 $model->original_volume = $purchase->volume - $purchase->consumed;
             }
             $model->fixed_volume = $volume;
@@ -78,7 +80,6 @@ class VizualizerStock_Model_Report extends Vizualizer_Plugin_Model
                 $purchase->purchase_status = "consumed";
             }
             $purchase->save();
-
         }
     }
 
