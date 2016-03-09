@@ -72,7 +72,13 @@ class VizualizerStock_Model_Report extends Vizualizer_Plugin_Model
                 $model->original_volume = $purchase->volume - $purchase->consumed;
             }
             $model->fixed_volume = $volume;
+            $model->save();
             $purchase->consumed = $purchase->volume - $volume;
+            if ($purchase->volume == $purchase->consumed) {
+                $purchase->purchase_status = "consumed";
+            }
+            $purchase->save();
+
         }
     }
 
