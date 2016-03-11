@@ -34,17 +34,20 @@ class VizualizerStock_Module_Order_Page extends Vizualizer_Plugin_Module_Page
     function execute($params)
     {
         $post = Vizualizer::request();
+        $attr = Vizualizer::attr();
         if ($params->check("daily")) {
             $search = $post["search"];
             if (empty($search["pre:order_date"])) {
                 $search["pre:order_date"] = date("Y-m-d");
                 $post->set("search", $search);
             }
-            $attr = Vizualizer::attr();
             $attr["thisday"] = date("Y-m-d", strtotime($search["pre:order_date"]));
             $attr["lastday"] = date("Y-m-d", strtotime("-1 day", strtotime($attr["thisday"])));
             $attr["nextday"] = date("Y-m-d", strtotime("+1 day", strtotime($attr["thisday"])));
         }
+        $loader = new Vizualizer_Plugin("stock");
+        $model = $loader->loadModel("Order");
+        $attr["total"] = $model->summeryBy("price", $post["search"]);
         $this->executeImpl($params, "Stock", "Order", $params->get("result", "orders"));
     }
 }
