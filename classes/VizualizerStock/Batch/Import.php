@@ -64,9 +64,15 @@ class VizualizerStock_Batch_Import extends Vizualizer_Plugin_Batch
             // Create an Amazon S3 client using the shared configuration data.
             $client = $sdk->createS3();
             if (count($params) > 3) {
-                $time = strtotime($params[3]);
+                if ($params[3] == "today") {
+                    $time = time();
+                } elseif($params[3] == "yesterday") {
+                    $time = strtotime("-1 day");
+                } else {
+                    $time = strtotime($params[3]);
+                }
             } else {
-                $time = strtotime("-1 day");
+                $time = time();
             }
             // Get the object
             $result = $client->getObject(array(
