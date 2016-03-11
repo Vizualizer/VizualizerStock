@@ -34,6 +34,13 @@ class VizualizerStock_Module_Order_Page extends Vizualizer_Plugin_Module_Page
     function execute($params)
     {
         $post = Vizualizer::request();
+        if ($params->check("daily")) {
+            $search = $post["search"];
+            if (empty($search["pre:order_date"])) {
+                $search["pre:order_date"] = date("Y-m-d");
+                $post->set("search", $search);
+            }
+        }
         $this->executeImpl($params, "Stock", "Order", $params->get("result", "orders"));
     }
 }
