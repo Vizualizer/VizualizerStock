@@ -40,6 +40,10 @@ class VizualizerStock_Module_Order_Page extends Vizualizer_Plugin_Module_Page
                 $search["pre:order_date"] = date("Y-m-d");
                 $post->set("search", $search);
             }
+            $attr = Vizualizer::attr();
+            $attr["thisday"] = date("Y-m-d", strtotime($search["pre:order_date"]));
+            $attr["lastday"] = date("Y-m-d", strtotime("-1 day", strtotime($attr["thisday"])));
+            $attr["nextday"] = date("Y-m-d", strtotime("+1 day", strtotime($attr["thisday"])));
         }
         $this->executeImpl($params, "Stock", "Order", $params->get("result", "orders"));
     }
