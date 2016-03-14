@@ -43,6 +43,7 @@ class VizualizerStock_Module_Sales_Daily extends Vizualizer_Plugin_Module
         $orders = $order->queryAllBy("SELECT SUBSTR(order_date, 1, 10) AS order_date, SUM(price) AS price FROM `stock_orders` WHERE order_date LIKE '".$month."-%' GROUP BY SUBSTR(order_date, 1, 10)");
         $attr = Vizualizer::attr();
         $attr["sales"] = $orders;
+        $attr["thismonth"] = date("Y-m-01", strtotime($month."-01"));
         $attr["nextmonth"] = date("Y-m", strtotime("+1 month", strtotime($month."-01")));
         $attr["lastmonth"] = date("Y-m", strtotime("-1 month", strtotime($month."-01")));
     }

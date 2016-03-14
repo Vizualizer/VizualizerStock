@@ -49,6 +49,7 @@ class VizualizerStock_Module_Sales_Product extends Vizualizer_Plugin_Module
         $orders = $order->queryAllBy($query);
         $attr = Vizualizer::attr();
         $attr["sales"] = $orders;
+        $attr["thismonth"] = date("Y-m-01", strtotime($month."-01"));
         $attr["nextmonth"] = date("Y-m", strtotime("+1 month", strtotime($month."-01")));
         $attr["lastmonth"] = date("Y-m", strtotime("-1 month", strtotime($month."-01")));
     }
