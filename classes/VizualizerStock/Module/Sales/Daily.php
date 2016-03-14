@@ -33,14 +33,27 @@ class VizualizerStock_Module_Sales_Daily extends Vizualizer_Plugin_Module
 
     function execute($params)
     {
-        $loader = new Vizualizer_Plugin("stock");
-        $order = $loader->loadModel("Order");
+        // パラメータを調整
         $post = Vizualizer::request();
         $month = $post["ym"];
         if (empty($month) || preg_match("/[0-9]{4}-[0-9]{2}/", $month) == 0) {
             $month = date("Y-m");
         }
-        $orders = $order->queryAllBy("SELECT SUBSTR(order_date, 1, 10) AS order_date, SUM(price) AS price FROM `stock_orders` WHERE order_date LIKE '".$month."-%' GROUP BY SUBSTR(order_date, 1, 10)");
+
+        // クエリを生成
+        $loader = new Vizualizer_Plugin("stock");
+        $orders = $loader->loadTable("Orders");
+        $select = new Vizualizer_Query_Select($orders);
+        $select->addColumn("SUBSTR(".$orders->order_date.", 1, 10)", "order_date");
+        $select->addColumn("SUM(".$orders->price.")", "price");
+        $select->where("order_date LIKE ?", array($month."-%"));
+        $select->group("SUBSTR(".$orders->order_date.", 1, 10)");
+
+        // 生成したクエリに対して検索を実行し、結果をモデルとして取得
+        $order = $loader->loadModel("Order");
+        $orders = $order->queryAllBy($select);
+
+        // 結果を属性に設定
         $attr = Vizualizer::attr();
         $attr["sales"] = $orders;
         $attr["thismonth"] = date("Y-m-01", strtotime($month."-01"));
