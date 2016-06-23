@@ -88,7 +88,7 @@ class VizualizerStock_Model_OrderDetail extends Vizualizer_Plugin_Model
                 // メニューが確定されている場合は引き当てを実行
                 $components = $menu->components();
                 foreach($components as $component) {
-                    if ($quantity <= 0) {
+                    if ($component->quantity <= 0) {
                         break;
                     }
                     $quantity = $component->quantity;
