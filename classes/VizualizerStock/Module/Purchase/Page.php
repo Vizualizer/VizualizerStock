@@ -23,40 +23,17 @@
  */
 
 /**
- * 商品構成資材のモデルです。
+ * 仕入のリストをページング付きで取得する。
  *
- * @package VizualizerStock
+ * @package VizualizerTrade
  * @author Naohisa Minagawa <info@vizualizer.jp>
  */
-class VizualizerStock_Model_Component extends Vizualizer_Plugin_Model
+class VizualizerStock_Module_Purchase_Page extends Vizualizer_Plugin_Module_Page
 {
 
-    /**
-     * コンストラクタ
-     *
-     * @param $values モデルに初期設定する値
-     */
-    public function __construct($values = array())
+    function execute($params)
     {
-        $loader = new Vizualizer_Plugin("stock");
-        parent::__construct($loader->loadTable("Components"), $values);
-    }
-
-    /**
-     * 主キーでデータを取得する。
-     *
-     * @param $component_id 商品構成資材ID
-     */
-    public function findByPrimaryKey($component_id)
-    {
-        $this->findBy(array("component_id" => $component_id));
-    }
-
-    public function material()
-    {
-        $loader = new Vizualizer_Plugin("stock");
-        $model = $loader->loadModel("Material");
-        $model->findByPrimaryKey($this->material_id);
-        return $model;
+        $post = Vizualizer::request();
+        $this->executeImpl($params, "Stock", "Purchase", $params->get("result", "purchases"));
     }
 }

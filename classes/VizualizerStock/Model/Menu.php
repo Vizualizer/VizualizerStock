@@ -23,12 +23,12 @@
  */
 
 /**
- * 商品構成資材のモデルです。
+ * メニューのモデルです。
  *
  * @package VizualizerStock
  * @author Naohisa Minagawa <info@vizualizer.jp>
  */
-class VizualizerStock_Model_Component extends Vizualizer_Plugin_Model
+class VizualizerStock_Model_Menu extends Vizualizer_Plugin_Model
 {
 
     /**
@@ -39,24 +39,23 @@ class VizualizerStock_Model_Component extends Vizualizer_Plugin_Model
     public function __construct($values = array())
     {
         $loader = new Vizualizer_Plugin("stock");
-        parent::__construct($loader->loadTable("Components"), $values);
+        parent::__construct($loader->loadTable("Menus"), $values);
     }
 
     /**
      * 主キーでデータを取得する。
      *
-     * @param $component_id 商品構成資材ID
+     * @param $menu_id メニューID
      */
-    public function findByPrimaryKey($component_id)
+    public function findByPrimaryKey($menu_id)
     {
-        $this->findBy(array("component_id" => $component_id));
+        $this->findBy(array("menu_id" => $menu_id));
     }
 
-    public function material()
+    public function components()
     {
         $loader = new Vizualizer_Plugin("stock");
-        $model = $loader->loadModel("Material");
-        $model->findByPrimaryKey($this->material_id);
-        return $model;
+        $model = $loader->loadModel("Component");
+        return $model->findAllBy(array("menu_id" => $this->menu_id));
     }
 }

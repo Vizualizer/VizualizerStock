@@ -51,4 +51,14 @@ class VizualizerStock_Model_Order extends Vizualizer_Plugin_Model
     {
         $this->findBy(array("order_id" => $order_id));
     }
+
+    /**
+     * 注文データ
+     */
+    public function orderDetail()
+    {
+        $loader = new Vizualizer_Plugin("stock");
+        $model = $loader->loadModel("OrderDetail");
+        return $model->findAllByOrderId($this->order_id);
+    }
 }

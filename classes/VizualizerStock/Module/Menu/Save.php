@@ -23,40 +23,30 @@
  */
 
 /**
- * 商品構成資材のモデルです。
+ * メニューのデータを保存する。
  *
- * @package VizualizerStock
+ * @package VizualizerTrade
  * @author Naohisa Minagawa <info@vizualizer.jp>
  */
-class VizualizerStock_Model_Component extends Vizualizer_Plugin_Model
+class VizualizerStock_Module_Menu_Save extends Vizualizer_Plugin_Module_Save
 {
 
-    /**
-     * コンストラクタ
-     *
-     * @param $values モデルに初期設定する値
-     */
-    public function __construct($values = array())
+    function execute($params)
     {
-        $loader = new Vizualizer_Plugin("stock");
-        parent::__construct($loader->loadTable("Components"), $values);
-    }
+        $this->executeImpl("Stock", "Menu", "menu_id");
 
-    /**
-     * 主キーでデータを取得する。
-     *
-     * @param $component_id 商品構成資材ID
-     */
-    public function findByPrimaryKey($component_id)
-    {
-        $this->findBy(array("component_id" => $component_id));
-    }
-
-    public function material()
-    {
+        $post = Vizualizer::request();
         $loader = new Vizualizer_Plugin("stock");
-        $model = $loader->loadModel("Material");
-        $model->findByPrimaryKey($this->material_id);
-        return $model;
+        $model = $loader->loadModel("Menu");
+        $model->findByPrimaryKey($post["menu_id"]);
+
+        if ($model->menu_id > 0 && $model->fixed_flg == "1") {
+            $orderDetail = $loader->loadModel("OrderDetail");
+            $orderDetails = $orderDetail->findAllBy(array("set_id" => $model->set_id, "choice_id" => $model->choice_id, "ne:provision_flg" => "1"));
+
+            foreach ($orderDetails as $orderDetail) {
+                $orderDetail->provision();
+            }
+        }
     }
 }

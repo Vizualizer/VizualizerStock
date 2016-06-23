@@ -59,4 +59,62 @@ class VizualizerStock_Model_OrderDetail extends Vizualizer_Plugin_Model
     {
         return $this->findAllBy(array("order_id" => $order_id));
     }
+
+    /**
+     * 注文データ
+     */
+    public function order()
+    {
+        $loader = new Vizualizer_Plugin("stock");
+        $model = $loader->loadModel("Order");
+        $model->findByPrimaryKey($this->order_id);
+        return $model;
+    }
+
+    /**
+     * 注文詳細のデータを元に在庫の引き当てを実施
+     */
+    public function provision()
+    {
+        $loader = new Vizualizer_Plugin("stock");
+        $menu = $loader->loadModel("Menu");
+        $menu->findBy(array("set_id" => $this->set_id, "choice_id" => $this->choice_id));
+        if ($menu->menu_id > 0 && $menu->fixed_flg == "1") {
+            // トランザクションの開始
+            $connection = Vizualizer_Database_Factory::begin("stock");
+
+            try {
+
+                // メニューが確定されている場合は引き当てを実行
+                $components = $menu->components();
+                foreach($components as $component) {
+                    if ($component->quantity <= 0) {
+                        break;
+                    }
+                    $quantity = $component->quantity;
+                    $purchase = $loader->loadModel("Purchase");
+                    $purchases = $purchase->findAllBy(array("material_id" => $component->material_id, "purchase_status" => "stocked"), "production_date", false);
+                    foreach ($purchases as $purchase) {
+                        if ($quantity < $purchase->volume - $purchase->consumed) {
+                            $purchase->consumed += $quantity;
+                            $quantity = 0;
+                        } else {
+                            $quantity -= ($purchase->volume - $purchase->consumed);
+                            $purchase->consumed = $purchase->volume;
+                            $purchase->purchase_status = "consumed";
+                        }
+                        $purchase->save();
+                    }
+                }
+                $this->provision_flg = 1;
+                $this->save();
+
+                Vizualizer_Database_Factory::commit($connection);
+            } catch (Exception $e) {
+                Vizualizer_Database_Factory::rollback($connection);
+                throw new Vizualizer_Exception_Database($e);
+            }
+        }
+    }
+
 }

@@ -51,4 +51,35 @@ class VizualizerStock_Model_Material extends Vizualizer_Plugin_Model
     {
         $this->findBy(array("material_id" => $material_id));
     }
+
+    public function company()
+    {
+        $loader = new Vizualizer_Plugin("admin");
+        $model = $loader->loadModel("Company");
+        $model->findByPrimaryKey($this->company_id);
+        return $model;
+    }
+
+    public function purchases($status = "")
+    {
+        $loader = new Vizualizer_Plugin("stock");
+        $model = $loader->loadModel("Purchase");
+        $condition = array("material_id" => $this->material_id);
+        if (!empty($status)) {
+            $condition["purchase_status"] = $status;
+        }
+        return $model->findAllBy($condition);
+    }
+
+    public function stock()
+    {
+        $purchases = $this->purchases("stocked");
+        $stock = 0;
+        foreach ($purchases as $purchase) {
+            if ($purchase->volume > $purchase->consumed) {
+                $stock += $purchase->volume - $purchase->consumed;
+            }
+        }
+        return $stock;
+    }
 }

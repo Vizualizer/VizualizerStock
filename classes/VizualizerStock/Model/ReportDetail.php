@@ -23,12 +23,12 @@
  */
 
 /**
- * 商品構成資材のモデルです。
+ * 日報詳細のモデルです。
  *
  * @package VizualizerStock
  * @author Naohisa Minagawa <info@vizualizer.jp>
  */
-class VizualizerStock_Model_Component extends Vizualizer_Plugin_Model
+class VizualizerStock_Model_ReportDetail extends Vizualizer_Plugin_Model
 {
 
     /**
@@ -39,24 +39,24 @@ class VizualizerStock_Model_Component extends Vizualizer_Plugin_Model
     public function __construct($values = array())
     {
         $loader = new Vizualizer_Plugin("stock");
-        parent::__construct($loader->loadTable("Components"), $values);
+        parent::__construct($loader->loadTable("ReportDetails"), $values);
     }
 
     /**
      * 主キーでデータを取得する。
      *
-     * @param $component_id 商品構成資材ID
+     * @param $material_id 資材ID
      */
-    public function findByPrimaryKey($component_id)
+    public function findByPrimaryKey($report_detail_id)
     {
-        $this->findBy(array("component_id" => $component_id));
+        $this->findBy(array("report_detail_id" => $report_detail_id));
     }
 
-    public function material()
+    public function purchase()
     {
         $loader = new Vizualizer_Plugin("stock");
-        $model = $loader->loadModel("Material");
-        $model->findByPrimaryKey($this->material_id);
+        $model = $loader->loadModel("Purchase");
+        $model->findByPrimaryKey($this->purchase_id);
         return $model;
     }
 }
